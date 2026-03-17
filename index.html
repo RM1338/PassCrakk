@@ -209,11 +209,152 @@
         .success-message.show {
             display: block;
         }
+        .login-container {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: #f8fafc;
+            z-index: 9999;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .login-container.show {
+            display: flex;
+        }
+
+        .login-card {
+            background-color: #ffffff;
+            border: 1px solid #e2e8f0;
+            border-radius: 4px;
+            padding: 40px;
+            max-width: 400px;
+            width: 100%;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.07);
+        }
+
+        .login-header {
+            text-align: center;
+            margin-bottom: 32px;
+        }
+
+        .login-header h2 {
+            font-size: 24px;
+            font-weight: 700;
+            color: #1a1a2e;
+            margin-bottom: 8px;
+        }
+
+        .login-header p {
+            font-size: 14px;
+            color: #71717a;
+        }
+
+        .login-input-group {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        .login-label {
+            font-size: 14px;
+            font-weight: 600;
+            color: #3f3f46;
+        }
+
+        .login-input {
+            height: 44px;
+            width: 100%;
+            border: 1px solid #d4d4d8;
+            border-radius: 4px;
+            padding: 0 16px;
+            font-size: 16px;
+            font-family: 'Inter', sans-serif;
+            color: #1a1a2e;
+            transition: border-color 0.2s ease;
+        }
+
+        .login-input:focus {
+            outline: 2px solid #1a1a2e;
+            outline-offset: -1px;
+        }
+
+        .login-input::placeholder {
+            color: #a1a1a6;
+        }
+
+        .login-btn {
+            height: 44px;
+            width: 100%;
+            background-color: #1a1a2e;
+            color: #ffffff;
+            font-weight: 600;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.2s ease;
+        }
+
+        .login-btn:hover {
+            background-color: rgba(26, 26, 46, 0.9);
+        }
+
+        .login-btn:active {
+            transform: scale(0.99);
+        }
+
+        .login-error {
+            display: none;
+            font-size: 13px;
+            color: #ef4444;
+            font-weight: 500;
+            margin-top: 12px;
+            text-align: center;
+        }
+
+        .login-error.show {
+            display: block;
+        }
+
+        .generator-hidden {
+            display: none;
+        }
+
+        main.show {
+            display: block;
+        }
     </style>
 </head>
 <body>
+    <!-- BEGIN: Login Container -->
+    <div class="login-container show" id="loginContainer">
+        <div class="login-card">
+            <div class="login-header">
+                <h2>Access Required</h2>
+                <p>Enter the password to access the generator</p>
+            </div>
+            <div class="login-input-group">
+                <label class="login-label" for="passwordInput">Password</label>
+                <input 
+                    class="login-input" 
+                    id="passwordInput" 
+                    type="password" 
+                    placeholder="Enter password"
+                />
+            </div>
+            <button class="login-btn" id="loginBtn">Access</button>
+            <div class="login-error" id="loginError"></div>
+        </div>
+    </div>
+    <!-- END: Login Container -->
+
     <!-- BEGIN: Main Generator Card -->
-    <main data-purpose="generator-container">
+    <main data-purpose="generator-container" class="generator-hidden" id="generatorContainer">
         <!-- BEGIN: Header Section -->
         <header>
             <h1>Password Generator</h1>
@@ -258,6 +399,65 @@
     <!-- END: Main Generator Card -->
 
     <!-- BEGIN: Logic Scripts -->
+    <script data-purpose="login-logic">
+        const loginContainer = document.getElementById('loginContainer');
+        const generatorContainer = document.getElementById('generatorContainer');
+        const passwordInput = document.getElementById('passwordInput');
+        const loginBtn = document.getElementById('loginBtn');
+        const loginError = document.getElementById('loginError');
+
+        async function checkPassword() {
+            const enteredPassword = passwordInput.value;
+            
+            try {
+                // Send password to backend for verification
+                const response = await fetch('/api/verify-password', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ password: enteredPassword })
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    // Password correct - show generator
+                    loginContainer.classList.remove('show');
+                    generatorContainer.classList.add('show');
+                    loginError.classList.remove('show');
+                    // Store session token if provided
+                    if (result.token) {
+                        sessionStorage.setItem('authToken', result.token);
+                    }
+                } else {
+                    // Password incorrect - show error
+                    loginError.textContent = 'Incorrect password. Please try again.';
+                    loginError.classList.add('show');
+                    passwordInput.value = '';
+                    passwordInput.focus();
+                }
+            } catch (error) {
+                // Fallback for local testing - remove this in production
+                console.error('Authentication error:', error);
+                loginError.textContent = 'Error connecting to server. Please try again.';
+                loginError.classList.add('show');
+            }
+        }
+
+        loginBtn.addEventListener('click', checkPassword);
+
+        // Allow Enter key to submit
+        passwordInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                checkPassword();
+            }
+        });
+
+        // Focus on password input on load
+        passwordInput.focus();
+    </script>
+
     <script data-purpose="password-logic">
         const timeInput = document.getElementById('timeInput');
         const generateBtn = document.getElementById('generateBtn');
