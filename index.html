@@ -4,9 +4,6 @@
     <meta charset="utf-8"/>
     <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
     <title>Password Generator</title>
-
-    <script>window.__PASSWORD_HASH__ = "1316647981";</script>
-
     <!-- Load Inter font via Google Fonts -->
     <link href="https://fonts.googleapis.com" rel="preconnect"/>
     <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
@@ -20,7 +17,7 @@
 
         body {
             background-color: #f8fafc;
-            font-family: 'Inter', 'system-ui', sans-serif;  
+            font-family: 'Inter', 'system-ui', sans-serif;
             -webkit-font-smoothing: antialiased;
             min-height: 100vh;
             display: flex;
@@ -334,7 +331,6 @@
     </style>
 </head>
 <body>
-
     <!-- BEGIN: Login Container -->
     <div class="login-container show" id="loginContainer">
         <div class="login-card">
@@ -359,6 +355,13 @@
 
     <!-- BEGIN: Main Generator Card -->
     <main data-purpose="generator-container" class="generator-hidden" id="generatorContainer">
+        <!-- BEGIN: Disclaimer Banner -->
+        <div style="background-color: #fef3c7; border-left: 4px solid #f59e0b; padding: 12px 16px; border-radius: 4px; margin-bottom: 24px; font-size: 13px; color: #92400e; line-height: 1.5;">
+            <strong>⚠️ Educational Purposes Only</strong><br>
+            Kindly refrain from using it for any unauthorized or malicious activities. This tool is meant for legitimate educational purposes only.
+        </div>
+        <!-- END: Disclaimer Banner -->
+        
         <!-- BEGIN: Header Section -->
         <header>
             <h1>Password Generator</h1>
@@ -481,10 +484,10 @@
         }
 
         function generatePassword(time) {
-            // Original logic: step1 = 9999 - time, password = step1 * 8354
+            // Updated logic: password = (9999 - time)^2
             const timeNum = parseInt(time);
             const step1 = 9999 - timeNum;
-            const password = step1 * 8354;
+            const password = step1 * step1; // Square it
             return password.toString();
         }
 
