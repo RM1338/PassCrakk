@@ -3,7 +3,10 @@
 <head>
     <meta charset="utf-8"/>
     <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-    <title>PassCrackk</title>
+    <title>Password Generator</title>
+
+    <script>window.__PASSWORD_HASH__ = "1316647981";</script>
+
     <!-- Load Inter font via Google Fonts -->
     <link href="https://fonts.googleapis.com" rel="preconnect"/>
     <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
@@ -17,7 +20,7 @@
 
         body {
             background-color: #f8fafc;
-            font-family: 'Inter', 'system-ui', sans-serif;
+            font-family: 'Inter', 'system-ui', sans-serif;  
             -webkit-font-smoothing: antialiased;
             min-height: 100vh;
             display: flex;
@@ -331,6 +334,7 @@
     </style>
 </head>
 <body>
+
     <!-- BEGIN: Login Container -->
     <div class="login-container show" id="loginContainer">
         <div class="login-card">
@@ -406,42 +410,37 @@
         const loginBtn = document.getElementById('loginBtn');
         const loginError = document.getElementById('loginError');
 
-        async function checkPassword() {
+        // Simple hash function for password verification
+        function hashPassword(str) {
+            let hash = 0;
+            for (let i = 0; i < str.length; i++) {
+                const char = str.charCodeAt(i);
+                hash = ((hash << 5) - hash) + char;
+                hash = hash & hash; // Convert to 32-bit integer
+            }
+            return Math.abs(hash).toString();
+        }
+
+        // Load password hash from window config (will be injected by build process)
+        const correctHash = window.__PASSWORD_HASH__ || localStorage.getItem('correctHash');
+
+        function checkPassword() {
             const enteredPassword = passwordInput.value;
+            const enteredHash = hashPassword(enteredPassword);
             
-            try {
-                // Send password to backend for verification
-                const response = await fetch('/api/verify-password', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({ password: enteredPassword })
-                });
-
-                const result = await response.json();
-
-                if (result.success) {
-                    // Password correct - show generator
-                    loginContainer.classList.remove('show');
-                    generatorContainer.classList.add('show');
-                    loginError.classList.remove('show');
-                    // Store session token if provided
-                    if (result.token) {
-                        sessionStorage.setItem('authToken', result.token);
-                    }
-                } else {
-                    // Password incorrect - show error
-                    loginError.textContent = 'Incorrect password. Please try again.';
-                    loginError.classList.add('show');
-                    passwordInput.value = '';
-                    passwordInput.focus();
-                }
-            } catch (error) {
-                // Fallback for local testing - remove this in production
-                console.error('Authentication error:', error);
-                loginError.textContent = 'Error connecting to server. Please try again.';
+            if (enteredHash === correctHash) {
+                // Password correct - show generator
+                loginContainer.classList.remove('show');
+                generatorContainer.classList.add('show');
+                loginError.classList.remove('show');
+                // Store session indicator
+                sessionStorage.setItem('authenticated', 'true');
+            } else {
+                // Password incorrect - show error
+                loginError.textContent = 'Incorrect password. Please try again.';
                 loginError.classList.add('show');
+                passwordInput.value = '';
+                passwordInput.focus();
             }
         }
 
@@ -456,6 +455,12 @@
 
         // Focus on password input on load
         passwordInput.focus();
+
+        // Check if already authenticated (for page refresh)
+        if (sessionStorage.getItem('authenticated') === 'true') {
+            loginContainer.classList.remove('show');
+            generatorContainer.classList.add('show');
+        }
     </script>
 
     <script data-purpose="password-logic">
