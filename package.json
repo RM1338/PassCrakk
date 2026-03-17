@@ -1,0 +1,8 @@
+{
+  "name": "PassCrakk",
+  "version": "1.0.0",
+  "description": "Time-based password generator",
+  "scripts": {
+    "build": "echo 'No build required'"
+  }
+}
