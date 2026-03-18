@@ -4,9 +4,7 @@
     <meta charset="utf-8"/>
     <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
     <title>Password Generator</title>
-
     <script>window.__PASSWORD_HASH__ = "1316647981";</script>
-
     <!-- Load Inter font via Google Fonts -->
     <link href="https://fonts.googleapis.com" rel="preconnect"/>
     <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
@@ -439,8 +437,7 @@
                 loginContainer.classList.remove('show');
                 generatorContainer.classList.add('show');
                 loginError.classList.remove('show');
-                // Store session indicator
-                sessionStorage.setItem('authenticated', 'true');
+                // Don't store authentication in sessionStorage (security risk)
             } else {
                 // Password incorrect - show error
                 loginError.textContent = 'Incorrect password. Please try again.';
@@ -462,11 +459,8 @@
         // Focus on password input on load
         passwordInput.focus();
 
-        // Check if already authenticated (for page refresh)
-        if (sessionStorage.getItem('authenticated') === 'true') {
-            loginContainer.classList.remove('show');
-            generatorContainer.classList.add('show');
-        }
+        // Don't rely on sessionStorage - always require password authentication
+        // This prevents users from bypassing login via browser console
     </script>
 
     <script data-purpose="password-logic">
